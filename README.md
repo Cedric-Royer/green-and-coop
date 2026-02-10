@@ -4,13 +4,13 @@ Ce module constitue la brique de **Transformation** (T) du pipeline ETL de Green
 
 ---
 
-## 📋 Contexte du projet
+## Contexte du projet
 
 Dans le cadre du projet **Forecast 2.0**, nous intégrons des sources météo hétérogènes (InfoClimat, Weather Underground) pour affiner les prévisions de consommation dans les Hauts-de-France.
 
 Ce module automatise la normalisation des relevés météo qui arrivent avec des structures JSON imbriquées et des unités disparates (ex: Fahrenheit).
 
-## ⚙️ Logique de transformation
+## Logique de transformation
 
 Le script réalise les opérations suivantes :
 
@@ -57,8 +57,70 @@ source venv/bin/activate # Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
 
-### 3. Dépendances
+### 3. Exécution des modules
+
+Le projet se découpe en deux étapes :
+
+#### 1 : Normalisation et Staging S3
 
 ```bash
 python s3_staging.py
+```
+
+#### 2 : Ingestion dans la base de données locale
+
+```bash
+python ingest_to_mongo.py
+```
+
+## Schéma du processus ETL
+
+```text
+          [ SOURCE S3 : stations-source-data/ ]
+                        |
+                        v
+          [ Extraction S3 vers Pandas ]
+                        |
+                        v
+          [ Parsing & Normalisation ]
+           (Airbyte JSON -> DataFrame)
+                        |
+            +-----------+-----------+
+            |                       |
+      [ Format Imbriqué ]     [ Format Standard ]
+            |                       |
+            +----------->+<---------+
+                         |
+                         v
+          [ Stockage S3 : ready_for_mongo/ ]
+                         |
+                         v
+          [ Ingestion : MongoDB (Local) ]
+
+```
+
+## Format de sortie
+
+Chaque fichier CSV généré contient les champs normalisés suivants :
+
+- **timestamp** : Date et heure de l'observation.
+- **temperature** : Température en Celsius (°C).
+- **dew_point** : Point de rosée en Celsius (°C).
+- **humidity** : Taux d'humidité (%).
+- **pressure** : Pression atmosphérique (hPa).
+- **wind_speed** : Vitesse du vent (numérique).
+- **solar_radiation** : Rayonnement solaire ($W/m^2$).
+
+> **Note :** Tous les champs provenant de sources en Fahrenheit sont automatiquement convertis lors de la phase de transformation. Les unités textuelles (ex: "km/h", "hPa") sont retirées pour ne conserver que la valeur numérique exploitable.
+
+## Exemple de document normalisé
+
+```json
+{
+  "timestamp": "2024-05-20T14:30:00",
+  "temperature": 21.5,
+  "humidity": 65,
+  "wind_speed": 12.4,
+  "status": "cleaned"
+}
 ```
