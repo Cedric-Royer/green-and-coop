@@ -27,11 +27,18 @@ Le script réalise les opérations suivantes :
 
 ## Stack technique
 
-- **Langage :** Python 3.x
-- **Infrastructure :** AWS S3 (Stockage objet)
-- **Librairies :**
-  - `boto3` : Interface avec AWS.
-  - `pandas` : Manipulation de données.
+- **Langage**
+  - Python 3.11
+- **Infrastructure**
+  - AWS S3
+  - Docker
+  - Docker-Compose
+- **Base de données**
+  - MongoDB
+- **Librairies**
+  - `boto3` : Interaction avec le stockage objet S3.
+  - `pandas` : Traitement et normalisation des DataFrames.
+  - `pymongo` : Ingestion des données vers MongoDB.
   - `python-dotenv` : Gestion des variables d'environnement.
 
 ## Installation et utilisation
@@ -46,32 +53,22 @@ AWS_SECRET_ACCESS_KEY=votre_secret
 AWS_DEFAULT_REGION=eu-west-
 ```
 
-### 2. Dépendances
+### 2. Déploiement Docker
 
-#### Création de l'environnement virtuel
-
-python -m venv venv
-source venv/bin/activate # Windows: venv\Scripts\activate
-
-#### Installation des dépendances
-
-pip install -r requirements.txt
-
-### 3. Exécution des modules
-
-Le projet se découpe en deux étapes :
-
-#### 1 : Normalisation et Staging S3
+Le pipeline est entièrement conteneurisé. L'orchestration automatise la configuration de la base de données et l'exécution du script d'ingestion.
 
 ```bash
-python s3_staging.py
+docker-compose up --build
 ```
 
-#### 2 : Ingestion dans la base de données locale
+### Accès Compass
 
-```bash
-python ingest_to_mongo.py
-```
+### 3. Visualisation (Compass)
+
+- **Client** : MongoDB Compass
+- **URI** : `mongodb://localhost:27018/?directConnection=true`
+- **Port Hôte** : 27018
+- **Port Conteneur** : 27017
 
 ## Schéma du processus ETL
 
@@ -95,7 +92,7 @@ python ingest_to_mongo.py
           [ Stockage S3 : ready_for_mongo/ ]
                          |
                          v
-          [ Ingestion : MongoDB (Local) ]
+          [ Ingestion : MongoDB (Docker) ]
 
 ```
 

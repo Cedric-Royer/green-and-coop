@@ -70,7 +70,19 @@ def process_and_prepare_s3() -> None:
             
             # Préparation du fichier de sortie
             df_final = pd.DataFrame(final_rows)
-            site_id = s3_key.split('/')[1].replace('Source_File_', '')
+
+            folder_name = s3_key.split('/')[1]
+
+            # Source_File_Stations_Nord_FR/
+            if folder_name.startswith('Source_File_'):
+                site_id = folder_name.replace('Source_File_', '')
+            # Ichtegem_BE_source_file / La_Madeleine_FR_source_file
+            elif folder_name.endswith('_source_file'):
+                site_id = folder_name.replace('_source_file', '')
+            # Fallback
+            else:
+                site_id = folder_name
+
             output_key = f"{DEST_FOLDER}{site_id}_clean.csv"
             
             # Chargement vers la destination S3

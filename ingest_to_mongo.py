@@ -10,7 +10,7 @@ load_dotenv()
 # Configuration des ressources
 BUCKET_NAME = 'green-and-coop'
 SOURCE_PREFIX = 'stations-source-data/'
-MONGO_URI = "mongodb://localhost:27017/"
+MONGO_URI = "mongodb://database:27017/"
 DATABASE_NAME = "green_and_coop"
 
 # Initialisation des clients S3 et MongoDB
@@ -40,7 +40,7 @@ def ingest_station_data(s3_key: str):
     path_segments = s3_key.split('/')
     # On cible le nom du dossier parent (ex: Source_File_Ichtegem_BE)
     folder_name = path_segments[1] if len(path_segments) > 1 else "default"
-    collection_name = folder_name.replace('Source_File_', '').lower()
+    collection_name = "stations_nord_fr"  # SCHÉMA CIBLE UNIQUE
     
     # Lecture de l'objet S3
     response = s3_client.get_object(Bucket=BUCKET_NAME, Key=s3_key)
@@ -60,7 +60,7 @@ def ingest_station_data(s3_key: str):
                 final_documents.append({
                     "station_details": station,
                     "metadata": doc.get('metadata'),
-                    "hourly_forecast": doc.get('hourly'),
+                    "hourly": doc.get('hourly'),
                     "extraction_source": s3_key
                 })
         else:

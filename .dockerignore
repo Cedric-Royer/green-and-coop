@@ -1,0 +1,21 @@
+# Environnements virtuels
+venv/
+.venv/
+
+# Fichiers Python compilés
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Sensibles (AWS)
+.env
+
+# Git
+.git
+.gitignore
+
+# Logs, cache
+*.log
+.pytest_cache/
+.mypy_cache/

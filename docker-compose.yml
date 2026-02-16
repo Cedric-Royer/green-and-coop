@@ -3,9 +3,18 @@ services:
     image: mongo:latest
     container_name: mongodb_green-and-coop
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongo_data:/data/db
 
+  forecast:
+    build: .
+    env_file: .env
+    depends_on:
+      - database
+    volumes:
+      - forecast_data:/app/ready_for_mongo
+
 volumes:
   mongo_data:
+  forecast_data:
